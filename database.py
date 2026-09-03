@@ -28,3 +28,4 @@ class Messages(Base):
     content = Column(String(255))
     sent_at = Column(String(255))
     is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+
