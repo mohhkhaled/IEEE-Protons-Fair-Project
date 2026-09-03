@@ -6,4 +6,26 @@ DATABASE_URL = "mysql+mysqlconnector://root:PASSWORD@localhost/NAME"
 Engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=Engine)
 Base = declarative_base()
+#Main table for users
+class Users(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    national_id = Column(String(14), unique=True,index=True )
+    name = Column(String(255))
+    email = Column(String(255), unique=True, index=True)
+    password = Column(String(255))
+    role = Column(String(10))
+    school_id = Column(Integer, ForeignKey("schools.id"))
+    created_at = Column(String(255))
+#Messages table for storing messages
+class Messages(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id"))
+    receiver_id = Column(Integer, ForeignKey("users.id"))
+    content = Column(String(255))
+    sent_at = Column(String(255))
+    is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
 
