@@ -11,23 +11,10 @@ class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    nationalId = Column(String(14), unique=True,index=True )
+    national_id = Column(String(14), unique=True,index=True )
     name = Column(String(255))
     email = Column(String(255), unique=True, index=True)
     password = Column(String(255))
     role = Column(String(10))
-#Student table
-class Students(Base):
-    __tablename__ = "students"
-
-    id = Column(Integer, primary_key=True, index=True)
-    userId = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    grade = Column(String(50))
-#Teachers table
-class Teachers(Base):
-    __tablename__ = "teachers"
-
-    id = Column(Integer, primary_key=True, index=True)
-    userId = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    subject = Column(String(255))
-
+    school_id = Column(Integer, ForeignKey("schools.id"))
+    created_at = Column(String(255))
