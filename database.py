@@ -14,7 +14,7 @@ class Users(Base):
     national_id = Column(String(14), unique=True,index=True )
     name = Column(String(255))
     email = Column(String(255), unique=True, index=True)
-    password = Column(String(255))
+    password_hash = Column(String(255))
     role = Column(String(10))
     school_id = Column(Integer, ForeignKey("schools.id"))
     created_at = Column(String(255))
