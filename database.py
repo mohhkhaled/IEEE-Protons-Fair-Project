@@ -28,4 +28,14 @@ class Messages(Base):
     content = Column(String(255))
     sent_at = Column(String(255))
     is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+    #Notifications table for storing user notifications
+class Notifications(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    message = Column(String(255))
+    type = Column(String(50))
+    is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+    created_at = Column(String(255))
 
