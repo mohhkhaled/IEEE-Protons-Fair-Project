@@ -28,4 +28,18 @@ class Messages(Base):
     content = Column(String(255))
     sent_at = Column(String(255))
     is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+# Announcements Table
+def create_announcements_table(cursor):
+    query = """
+    CREATE TABLE IF NOT EXISTS announcements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        school_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE CASCADE
+    );
+    """
+    cursor.execute(query)
 
+    
