@@ -1,7 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
+from datetime import datetime
 from sqlalchemy.orm import sessionmaker, declarative_base
 #Database connection URL for MySQL database using mysqlconnector driver
-DATABASE_URL = "mysql+mysqlconnector://root:PASSWORD@localhost/NAME"
+DATABASE_URL = "mysql+mysqlconnector://root:253daleen2013@localhost/project"
 #Object Relational Mapping (ORM) for database connection and table creation
 Engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=Engine)
@@ -28,3 +29,23 @@ class Messages(Base):
     content = Column(String(255))
     sent_at = Column(String(255))
     is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+
+class Announcements(Base):
+    __tablename__ = "announcements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    school_id = Column(Integer, ForeignKey("schools.id"))
+    title = Column(String(255))
+    content = Column(String(255))
+    created_at = Column(String(255))
+
+#Documents table
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    uploaderId = Column(Integer, ForeignKey("users.id"), nullable=False)
+    schoolId = Column(Integer, nullable=False)
+    fileName = Column(String(255), nullable=False)
+    filePath = Column(String(500), nullable=False)
+    uploadedAt = Column(DateTime, default=datetime.utcnow)
