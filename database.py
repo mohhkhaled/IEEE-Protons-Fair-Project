@@ -28,14 +28,14 @@ class Messages(Base):
     receiver_id = Column(Integer, ForeignKey("users.id"))
     content = Column(String(255))
     sent_at = Column(String(255))
-    is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+    is_read = Column(Bool, default=False)  # 0 for unread, 1 for read
 
 class Announcements(Base):
     __tablename__ = "announcements"
 
     id = Column(Integer, primary_key=True, index=True)
     school_id = Column(Integer, ForeignKey("schools.id"))
-    title = Column(String(255))
+    title = Column(S    tring(255))
     content = Column(String(255))
     created_at = Column(String(255))
 
@@ -49,3 +49,60 @@ class Document(Base):
     fileName = Column(String(255), nullable=False)
     filePath = Column(String(500), nullable=False)
     uploadedAt = Column(DateTime, default=datetime.utcnow)
+
+class Notifications(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    message = Column(String(255))
+    type = Column(String(50))
+    is_read = Column(bool, default=False) 
+    created_at = Column(String(255))
+    
+def add_notification(user_id, message, notif_type):
+    """Add a new notification"""
+    session = SessionLocal()
+    new_notification = Notifications(
+        user_id=user_id,
+        message=message,
+        type=notif_type,
+        is_read=0
+    )
+    session.add(new_notification)
+    session.commit()
+    session.close()
+
+def get_user_notifications(user_id):
+    """Get all notifications for a specific user"""
+    session = SessionLocal()
+    results = session.query(Notifications).filter(Notifications.user_id == user_id).all()
+    session.close()
+    return results
+def get_unread_notifications(user_id):
+    """Get only unread notifications for a specific user"""
+    session = SessionLocal()
+    results = session.query(Notifications).filter(
+        Notifications.user_id == user_id,
+        Notifications.is_read == 0
+    ).all()
+    session.close()
+    return results
+
+def mark_as_read(notification_id):
+    """Mark a notification as read"""
+    session = SessionLocal()
+    notification = session.query(Notifications).filter(Notifications.id == notification_id).first()
+    if notification:
+        notification.is_read = 1
+        session.commit()
+    session.close()
+
+def delete_notification(notification_id):
+    """Delete a specific notification"""
+    session = SessionLocal()
+    notification = session.query(Notifications).filter(Notifications.id == notification_id).first()
+    if notification:
+        session.delete(notification)
+        session.commit()
+    session.close()
