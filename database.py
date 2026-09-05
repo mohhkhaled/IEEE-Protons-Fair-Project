@@ -38,7 +38,8 @@ class Notifications(Base):
     type = Column(String(50))
     is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
     created_at = Column(String(255))
-   def add_notification(user_id, message, notif_type):
+    
+def add_notification(user_id, message, notif_type):
     """Add a new notification"""
     session = SessionLocal()
     new_notification = Notifications(
