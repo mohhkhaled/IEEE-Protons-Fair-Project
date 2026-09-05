@@ -35,7 +35,7 @@ class Announcements(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     school_id = Column(Integer, ForeignKey("schools.id"))
-    title = Column(S    tring(255))
+    title = Column(String(255))
     content = Column(String(255))
     created_at = Column(String(255))
 
@@ -50,6 +50,16 @@ class Document(Base):
     filePath = Column(String(500), nullable=False)
     uploadedAt = Column(DateTime, default=datetime.utcnow)
 
+class Assignments(Base):
+    __tablename__ = "assignments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(255))
+    description = Column(String(500))
+    status = Column(String(20))
+    due_date = Column(Date, nullable=False)
+    
 class Notifications(Base):
     __tablename__ = "notifications"
 
