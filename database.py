@@ -12,7 +12,7 @@ class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    national_id = Column(String(14), unique=True,index=True )
+    national_id = Column(String(14), unique=True,index=True, nullable=False)
     name = Column(String(255))
     email = Column(String(255), unique=True, index=True)
     password_hash = Column(String(255))
@@ -28,8 +28,8 @@ class Messages(Base):
     receiver_id = Column(Integer, ForeignKey("users.id"))
     content = Column(String(255))
     sent_at = Column(String(255))
-    is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
-
+    is_read = Column(bool, default=False)  
+#Announcements table for storing announcements
 class Announcements(Base):
     __tablename__ = "announcements"
 
@@ -39,13 +39,13 @@ class Announcements(Base):
     content = Column(String(255))
     created_at = Column(String(255))
 
-#Documents table
-class Document(Base):
+#Documents table for storing documents
+class Documents(Base):
     __tablename__ = "documents"
 
     id = Column(Integer, primary_key=True, index=True)
-    uploaderId = Column(Integer, ForeignKey("users.id"), nullable=False)
-    schoolId = Column(Integer, nullable=False)
-    fileName = Column(String(255), nullable=False)
-    filePath = Column(String(500), nullable=False)
-    uploadedAt = Column(DateTime, default=datetime.utcnow)
+    uploader_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    school_id = Column(Integer, nullable=False)
+    file_name = Column(String(255), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
