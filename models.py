@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Boolean,Text
 from datetime import datetime
 from database import Base, SessionLocal, Engine
 #Main table
@@ -20,7 +20,7 @@ class Messages(Base):
     id = Column(Integer, primary_key=True, index=True)
     sender_id = Column(Integer, ForeignKey("users.id"))
     receiver_id = Column(Integer, ForeignKey("users.id"))
-    content = Column(String(65536))
+    content = Column(Text, nullable=False)
     sent_at = Column(DateTime, default=datetime.utcnow)
     is_read = Column(Boolean, default=False)  
 #Announcements table
@@ -30,7 +30,7 @@ class Announcements(Base):
     id = Column(Integer, primary_key=True, index=True)
     school_id = Column(Integer, ForeignKey("schools.id"))
     title = Column(String(220))
-    content = Column(String(3000))
+    content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 #Documents table
 class Documents(Base):
@@ -49,7 +49,7 @@ class Todos(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String(220))
-    description = Column(String(1500))
+    description = Column(Text, nullable=False)
     status = Column(String(20), default="pending")
     due_date = Column(Date, nullable=False)
 #Schools table
