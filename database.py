@@ -28,7 +28,7 @@ class Messages(Base):
     receiver_id = Column(Integer, ForeignKey("users.id"))
     content = Column(String(255))
     sent_at = Column(String(255))
-    is_read = Column(Bool, default=False)  # 0 for unread, 1 for read
+    is_read = Column("Bool", default=False)  # 0 for unread, 1 for read
 
 class Announcements(Base):
     __tablename__ = "announcements"
@@ -58,7 +58,7 @@ class Assignments(Base):
     title = Column(String(255))
     description = Column(String(500))
     status = Column(String(20))
-    due_date = Column(Date, nullable=False)
+    due_date = Column("Date", nullable=False)
     
 class Notifications(Base):
     __tablename__ = "notifications"
@@ -114,5 +114,62 @@ def delete_notification(notification_id):
     notification = session.query(Notifications).filter(Notifications.id == notification_id).first()
     if notification:
         session.delete(notification)
+        session.commit()
+    session.close()
+class Schools(Base):
+    __tablename__ = "schools"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    logo_url = Column(String(255))
+
+
+def add_school(name, logo_url=None):
+    """Add a new school"""
+    session = SessionLocal()
+    new_school = Schools(
+        name=name,
+        logo_url=logo_url
+    )
+    session.add(new_school)
+    session.commit()
+    session.close()
+
+
+def get_all_schools():
+    """Get all schools"""
+    session = SessionLocal()
+    results = session.query(Schools).all()
+    session.close()
+    return results
+
+
+def get_school_by_id(school_id):
+    """Get a specific school by its id"""
+    session = SessionLocal()
+    result = session.query(Schools).filter(Schools.id == school_id).first()
+    session.close()
+    return result
+
+
+def update_school(school_id, name=None, logo_url=None):
+    """Update a school's name or logo"""
+    session = SessionLocal()
+    school = session.query(Schools).filter(Schools.id == school_id).first()
+    if school:
+        if name:
+            school.name = name
+        if logo_url:
+            school.logo_url = logo_url
+        session.commit()
+    session.close()
+
+
+def delete_school(school_id):
+    """Delete a school"""
+    session = SessionLocal()
+    school = session.query(Schools).filter(Schools.id == school_id).first()
+    if school:
+        session.delete(school)
         session.commit()
     session.close()
