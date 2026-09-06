@@ -1,5 +1,5 @@
 from database import SessionLocal
-from models import Notification
+from models import Notifications
 
 def add_notification(user_id, message, notif_type):
     """Add a new notification"""
