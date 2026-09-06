@@ -7,7 +7,7 @@ DATABASE_URL = "mysql+mysqlconnector://root:253daleen2013@localhost/project"
 Engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=Engine)
 Base = declarative_base()
-#Main table for users
+#Main table
 class Users(Base):
     __tablename__ = "users"
 
@@ -19,7 +19,7 @@ class Users(Base):
     role = Column(String(10))
     school_id = Column(Integer, ForeignKey("schools.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
-#Messages table for storing messages
+#Messages table
 class Messages(Base):
     __tablename__ = "messages"
 
@@ -28,8 +28,8 @@ class Messages(Base):
     receiver_id = Column(Integer, ForeignKey("users.id"))
     content = Column(String(65536))
     sent_at = Column(DateTime, default=datetime.utcnow)
-    is_read = Column(Boolean, default=False)  # 0 for unread, 1 for read
-
+    is_read = Column(Boolean, default=False)  
+#Announcements table
 class Announcements(Base):
     __tablename__ = "announcements"
 
@@ -38,7 +38,6 @@ class Announcements(Base):
     title = Column(String(220))
     content = Column(String(3000))
     created_at = Column(DateTime, default=datetime.utcnow)
-
 #Documents table
 class Documents(Base):
     __tablename__ = "documents"
@@ -49,7 +48,7 @@ class Documents(Base):
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
-
+#Todos table
 class Todos(Base):
     __tablename__ = "todos"
 
@@ -59,13 +58,14 @@ class Todos(Base):
     description = Column(String(1500))
     status = Column(String(20), default="pending")
     due_date = Column(Date, nullable=False)
-
+#Schools table
 class Schools(Base):
     __tablename__ = "schools"
 
     id = Column(Integer,primary_key=True, index=True)
     logo_url = Column(String(255))
     name = Column(String(220))
+#Notifications table
 class Notifications(Base):
     __tablename__ = "notifications"
 
