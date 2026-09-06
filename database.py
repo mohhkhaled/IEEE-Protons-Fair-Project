@@ -50,8 +50,8 @@ class Documents(Base):
     file_path = Column(String(500), nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
-class Assignments(Base):
-    __tablename__ = "assignments"
+class Todos(Base):
+    __tablename__ = "Todos"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
