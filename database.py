@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Date, Boolean
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker, declarative_base
 #Database connection URL for MySQL database using mysqlconnector driver
@@ -59,7 +59,13 @@ class Assignments(Base):
     description = Column(String(500))
     status = Column(String(20))
     due_date = Column(Date, nullable=False)
-    
+
+class schools(Base):
+    __tablename_ = "schools"
+
+    id = Column(Integer,primary_key=True, index=True)
+    logo_url = Column(String(255))
+    name = Column(String(255))
 class Notifications(Base):
     __tablename__ = "notifications"
 
