@@ -1,5 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Date, Boolean
-from datetime import datetime
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 #Database connection URL for MySQL database using mysqlconnector driver
 DATABASE_URL = "mysql+mysqlconnector://root:253daleen2013@localhost/project"
@@ -7,72 +6,3 @@ DATABASE_URL = "mysql+mysqlconnector://root:253daleen2013@localhost/project"
 Engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=Engine)
 Base = declarative_base()
-#Main table
-class Users(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    national_id = Column(String(14), unique=True,index=True )
-    name = Column(String(255))
-    email = Column(String(255), unique=True, index=True)
-    password_hash = Column(String(255))
-    role = Column(String(10))
-    school_id = Column(Integer, ForeignKey("schools.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-#Messages table
-class Messages(Base):
-    __tablename__ = "messages"
-
-    id = Column(Integer, primary_key=True, index=True)
-    sender_id = Column(Integer, ForeignKey("users.id"))
-    receiver_id = Column(Integer, ForeignKey("users.id"))
-    content = Column(String(65536))
-    sent_at = Column(DateTime, default=datetime.utcnow)
-    is_read = Column(Boolean, default=False)  
-#Announcements table
-class Announcements(Base):
-    __tablename__ = "announcements"
-
-    id = Column(Integer, primary_key=True, index=True)
-    school_id = Column(Integer, ForeignKey("schools.id"))
-    title = Column(String(220))
-    content = Column(String(3000))
-    created_at = Column(DateTime, default=datetime.utcnow)
-#Documents table
-class Documents(Base):
-    __tablename__ = "documents"
-
-    id = Column(Integer, primary_key=True, index=True)
-    uploader_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
-    file_name = Column(String(255), nullable=False)
-    file_path = Column(String(500), nullable=False)
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
-#Todos table
-class Todos(Base):
-    __tablename__ = "todos"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    title = Column(String(220))
-    description = Column(String(1500))
-    status = Column(String(20), default="pending")
-    due_date = Column(Date, nullable=False)
-#Schools table
-class Schools(Base):
-    __tablename__ = "schools"
-
-    id = Column(Integer,primary_key=True, index=True)
-    logo_url = Column(String(255))
-    name = Column(String(220))
-#Notifications table
-class Notifications(Base):
-    __tablename__ = "notifications"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    message = Column(String(255))
-    type = Column(String(50))
-    is_read = Column(Boolean, default=False) 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
