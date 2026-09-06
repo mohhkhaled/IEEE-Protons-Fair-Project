@@ -26,7 +26,7 @@ class Messages(Base):
     id = Column(Integer, primary_key=True, index=True)
     sender_id = Column(Integer, ForeignKey("users.id"))
     receiver_id = Column(Integer, ForeignKey("users.id"))
-    content = Column(String(255))
+    content = Column(String(65536))
     sent_at = Column(DateTime, default=datetime.utcnow)
     is_read = Column(Boolean, default=False)  # 0 for unread, 1 for read
 
@@ -35,8 +35,8 @@ class Announcements(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     school_id = Column(Integer, ForeignKey("schools.id"))
-    title = Column(String(255))
-    content = Column(String(255))
+    title = Column(String(220))
+    content = Column(String(3000))
     created_at = Column(DateTime, default=datetime.utcnow)
 
 #Documents table
@@ -51,12 +51,12 @@ class Documents(Base):
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
 class Todos(Base):
-    __tablename__ = "Todos"
+    __tablename__ = "todos"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    title = Column(String(255))
-    description = Column(String(500))
+    title = Column(String(220))
+    description = Column(String(1500))
     status = Column(String(20), default="pending")
     due_date = Column(Date, nullable=False)
 
@@ -65,7 +65,7 @@ class Schools(Base):
 
     id = Column(Integer,primary_key=True, index=True)
     logo_url = Column(String(255))
-    name = Column(String(255))
+    name = Column(String(220))
 class Notifications(Base):
     __tablename__ = "notifications"
 
