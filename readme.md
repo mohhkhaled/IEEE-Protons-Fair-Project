@@ -9,4 +9,4 @@ Fast ,Reliable and Easy to use
 - fastapi
 - sqlalchemy
 
-![Project Models](Models.jpg)
+![Project Models](/static/assets/Models.jpg)
