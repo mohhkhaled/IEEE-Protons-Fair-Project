@@ -5,7 +5,7 @@ Fast ,Reliable and Easy to use
 ## Daresny is your main bridge between you and your students
 
 # Requirements:
-### - Python : 
+### Python : 
 - fastapi
 - sqlalchemy
 
