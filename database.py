@@ -12,26 +12,32 @@ class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    nationalId = Column(String(14), unique=True,index=True )
+    national_id = Column(String(14), unique=True,index=True )
     name = Column(String(255))
     email = Column(String(255), unique=True, index=True)
-    password = Column(String(255))
+    password_hash = Column(String(255))
     role = Column(String(10))
-#Student table
-class Students(Base):
-    __tablename__ = "students"
+    school_id = Column(Integer, ForeignKey("schools.id"))
+    created_at = Column(String(255))
+#Messages table for storing messages
+class Messages(Base):
+    __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    userId = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    grade = Column(String(50))
-#Teachers table
-class Teachers(Base):
-    __tablename__ = "teachers"
+    sender_id = Column(Integer, ForeignKey("users.id"))
+    receiver_id = Column(Integer, ForeignKey("users.id"))
+    content = Column(String(255))
+    sent_at = Column(String(255))
+    is_read = Column(Integer, default=0)  # 0 for unread, 1 for read
+
+class Announcements(Base):
+    __tablename__ = "announcements"
 
     id = Column(Integer, primary_key=True, index=True)
-    userId = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    subject = Column(String(255))
-
+    school_id = Column(Integer, ForeignKey("schools.id"))
+    title = Column(String(255))
+    content = Column(String(255))
+    created_at = Column(String(255))
 
 #Documents table
 class Document(Base):
