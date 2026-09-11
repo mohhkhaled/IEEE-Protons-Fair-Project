@@ -1,4 +1,3 @@
-![ER Diagram](docs/erd.png)
 
 # Welcome to Daresny
 
@@ -11,4 +10,4 @@ Fast ,Reliable and Easy to use
 - fastapi
 - sqlalchemy
 
-![Project Models](/static/assets/Models.jpg)
+![ER Diagram](/static/assets/Models.jpg)
