@@ -1,3 +1,5 @@
+![ER Diagram](docs/erd.png)
+
 # Welcome to Daresny
 
 Fast ,Reliable and Easy to use
@@ -5,7 +7,7 @@ Fast ,Reliable and Easy to use
 ## Daresny is your main bridge between you and your students
 
 # Requirements:
-### Python : 
+### Python :
 - fastapi
 - sqlalchemy
 
