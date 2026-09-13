@@ -36,4 +36,12 @@ class Announcements(Base):
     title = sqlalchemy.Column(sqlalchemy.String(255))
     content = sqlalchemy.Column(sqlalchemy.String(255))
     created_at = sqlalchemy.Column(sqlalchemy.String(255))
-    
+# Assignments
+class Assignments(Base):
+    __tablename__ = "assignments"
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
+    title = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.String(500), nullable=True)
+    due_date = sqlalchemy.Column(sqlalchemy.String(50), nullable=False)
+    school_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
