@@ -71,6 +71,28 @@ class AnnouncementResponse(BaseModel):
 
 
 # =========================
+# Assignments
+# =========================
+
+class AssignmentCreate(BaseModel):
+    title: str
+    description: str | None = None
+    due_date: str
+    school_id: int
+
+
+class AssignmentResponse(BaseModel):
+    id: int
+    title: str
+    description: str | None = None
+    due_date: str
+    school_id: int
+
+    class Config:
+        from_attributes = True
+
+
+# =========================
 # Documents
 # =========================
 
@@ -84,4 +106,3 @@ class DocumentResponse(BaseModel):
 
     class Config:
         from_attributes = True
-

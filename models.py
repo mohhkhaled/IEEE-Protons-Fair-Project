@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Boolean,Text
 from datetime import datetime
-from database import Base, SessionLocal, Engine
+from database import Base
 #Main table
 class Users(Base):
     __tablename__ = "users"
@@ -32,6 +32,15 @@ class Announcements(Base):
     title = Column(String(220))
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    # Assignments table
+class Assignments(Base):
+    __tablename__ = "assignments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    due_date = Column(Date, nullable=False)
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
 #Documents table
 class Documents(Base):
     __tablename__ = "documents"
