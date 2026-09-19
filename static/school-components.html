@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Site Components — Assignment Card & Document Library</title>
+<style>
+  /* ============ Design tokens ============ */
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#4B5A68;
+    --paper:#F1F3F6;
+    --surface:#FFFFFF;
+    --line:#D7DEE2;
+    --primary:#2C5F6D;
+    --primary-deep:#1F4750;
+    --accent:#D98E4A;
+    --success:#3E6B4B;
+    --success-bg:#E7F0E9;
+    --danger:#B44B43;
+    --danger-bg:#F7E7E5;
+    --pending-bg:#EFE6D8;
+    --pending:#8A6A2E;
+    --radius-card: 14px;
+    --radius-chip: 8px;
+    --font-head:'Lora', Georgia, 'Times New Roman', serif;
+    --font-body:'Inter', 'Segoe UI', Tahoma, sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Tajawal:wght@400;500;700&family=Lora:wght@600;700&family=Inter:wght@400;500;700&display=swap');
+
+  html[dir="rtl"]{
+    --font-head:'Amiri', Georgia, serif;
+    --font-body:'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    padding:40px 24px 80px;
+  }
+  h1{
+    font-family:var(--font-head);
+    font-size:26px;
+    margin:0 0 6px;
+  }
+  .page-sub{
+    color:var(--ink-soft);
+    margin:0 0 36px;
+    font-size:14.5px;
+  }
+  section.block{ max-width:1040px; margin:0 auto 56px; }
+  section.block h2{
+    font-family:var(--font-head);
+    font-size:19px;
+    border-bottom:2px solid var(--line);
+    padding-bottom:10px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  section.block h2 small{
+    font-family:var(--font-body);
+    font-weight:500;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  /* ============ Assignment cards ============ */
+  #assignments-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+    gap:16px;
+  }
+  .assignment-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius-card);
+    padding:18px 18px 16px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .assignment-card::before{
+    content:"";
+    position:absolute;
+    inset-inline-start:0;
+    top:0; bottom:0;
+    width:5px;
+    background:var(--subject-color, var(--primary));
+  }
+  .assignment-card .subject-tag{
+    align-self:flex-start;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--subject-color, var(--primary));
+    background:color-mix(in srgb, var(--subject-color, var(--primary)) 12%, white);
+    padding:3px 10px;
+    border-radius:999px;
+  }
+  .assignment-card h3{
+    margin:0;
+    font-family:var(--font-head);
+    font-size:16.5px;
+    line-height:1.4;
+  }
+  .assignment-card p.desc{
+    margin:0;
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    flex:1;
+  }
+  .assignment-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:10px;
+  }
+  .assignment-meta .due{ display:flex; align-items:center; gap:5px; }
+  .status-pill{
+    font-size:11px;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .status-pill.upcoming{ background:var(--pending-bg); color:var(--pending); }
+  .status-pill.submitted{ background:var(--success-bg); color:var(--success); }
+  .status-pill.late{ background:var(--danger-bg); color:var(--danger); }
+  .assignment-actions{
+    display:flex;
+    gap:8px;
+    margin-top:2px;
+  }
+  .btn{
+    border:none;
+    border-radius:var(--radius-chip);
+    padding:8px 14px;
+    font-family:var(--font-body);
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    transition:opacity .15s ease;
+  }
+  .btn:hover{ opacity:.85; }
+  .btn.primary{ background:var(--primary); color:#fff; }
+  .btn.ghost{ background:transparent; color:var(--primary); border:1px solid var(--line); }
+
+  /* ============ Document library ============ */
+  .library-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:18px;
+    align-items:center;
+  }
+  .library-search{
+    flex:1;
+    min-width:200px;
+    position:relative;
+  }
+  .library-search input{
+    width:100%;
+    padding:10px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-family:var(--font-body);
+    font-size:13.5px;
+    background:var(--surface);
+  }
+  .library-search input:focus{
+    outline:2px solid var(--primary);
+    outline-offset:1px;
+  }
+  .filter-tabs{ display:flex; gap:6px; flex-wrap:wrap; }
+  .filter-tabs button{
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink-soft);
+    font-family:var(--font-body);
+    font-size:12.5px;
+    font-weight:500;
+    padding:7px 13px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .filter-tabs button.active{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+  }
+
+  #library-list{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius-card);
+    overflow:hidden;
+  }
+  .doc-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:13px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .doc-row:last-child{ border-bottom:none; }
+  .doc-icon{
+    width:38px; height:38px;
+    border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .doc-info{ flex:1; min-width:0; }
+  .doc-info .name{
+    font-size:13.5px;
+    font-weight:700;
+    margin:0 0 3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .doc-info .meta{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .doc-row .download{
+    flex-shrink:0;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--primary);
+    border-radius:8px;
+    padding:7px 12px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:var(--font-body);
+  }
+  .doc-row .download:hover{ background:var(--paper); }
+  #library-empty{
+    padding:40px 18px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    display:none;
+  }
+
+  @media (max-width:520px){
+    .doc-row{ flex-wrap:wrap; }
+    .doc-info .meta{ gap:6px; }
+  }
+
+  /* ============ Language switch ============ */
+  .page-header{
+    max-width:1040px;
+    margin:0 auto 36px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .page-header .titles{ flex:1; }
+  .page-header h1{ margin:0 0 6px; }
+  .page-header .page-sub{ margin:0; }
+  .lang-switch{
+    display:flex;
+    border:1px solid var(--line);
+    border-radius:999px;
+    overflow:hidden;
+    flex-shrink:0;
+    background:var(--surface);
+  }
+  .lang-switch button{
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:var(--font-body);
+    font-size:12.5px;
+    font-weight:700;
+    padding:8px 16px;
+    cursor:pointer;
+  }
+  .lang-switch button.active{
+    background:var(--primary);
+    color:#fff;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="titles">
+    <h1 id="page-title">Student Dashboard — Frontend Components</h1>
+    <p class="page-sub" id="page-subtitle">Assignment card and document library, ready to drop into the school website. Data below is sample data — replace it with real data from your server (see the note at the bottom).</p>
+  </div>
+  <div class="lang-switch">
+    <button data-lang="en" id="lang-en">EN</button>
+    <button data-lang="ar" id="lang-ar">AR</button>
+  </div>
+</div>
+
+<section class="block">
+  <h2><span id="assign-heading">Assignments</span> <small id="assign-count"></small></h2>
+  <div id="assignments-grid"></div>
+</section>
+
+<section class="block">
+  <h2><span id="library-heading">Document Library</span> <small id="doc-count"></small></h2>
+  <div class="library-toolbar">
+    <div class="library-search">
+      <input type="text" id="doc-search">
+    </div>
+    <div class="filter-tabs" id="doc-filters"></div>
+  </div>
+  <div id="library-list"></div>
+  <div id="library-empty"></div>
+</section>
+
+<script>
+/* ==========================================================
+   Sample data — replace with real data from your server,
+   e.g. fetch('/api/assignments') / fetch('/api/documents')
+   ========================================================== */
+
+// UI text for every supported language. Add a language by adding a key here.
+const STRINGS = {
+  en: {
+    pageTitle: "Student Dashboard — Frontend Components",
+    pageSubtitle: "Assignment card and document library, ready to drop into the school website. Data below is sample data — replace it with real data from your server (see the note at the bottom).",
+    assignHeading: "Assignments",
+    libraryHeading: "Document Library",
+    searchPlaceholder: "Search documents by name…",
+    filterAll: "All",
+    statusUpcoming: "Upcoming",
+    statusSubmitted: "Submitted",
+    statusLate: "Late",
+    dueToday: "Due today",
+    dueTomorrow: "Due tomorrow",
+    dueIn: (n) => `Due in ${n} days`,
+    dueLateBy: (n) => `${n} day${n===1?"":"s"} late`,
+    openAssignment: "Open assignment",
+    attachmentCount: (n) => `${n} attachment${n===1?"":"s"}`,
+    download: "Download",
+    emptyLibrary: "No documents match your search."
+  },
+  ar: {
+    pageTitle: "لوحة الطالب — نماذج الواجهة الأمامية",
+    pageSubtitle: "بطاقة الواجب ومكتبة المستندات، جاهزتين للدمج في موقع المدرسة. البيانات هنا وهمية؛ استبدلها ببيانات حقيقية قادمة من الخادم (انظر الملاحظة أسفل الصفحة).",
+    assignHeading: "الواجبات",
+    libraryHeading: "مكتبة المستندات",
+    searchPlaceholder: "ابحث عن مستند بالاسم…",
+    filterAll: "الكل",
+    statusUpcoming: "قادم",
+    statusSubmitted: "تم التسليم",
+    statusLate: "متأخر",
+    dueToday: "اليوم",
+    dueTomorrow: "غدًا",
+    dueIn: (n) => `بعد ${n} أيام`,
+    dueLateBy: (n) => `متأخر ${n} يوم`,
+    openAssignment: "فتح الواجب",
+    attachmentCount: (n) => `${n} مرفق`,
+    download: "تحميل",
+    emptyLibrary: "لا توجد مستندات مطابقة لبحثك."
+  }
+};
+
+// Subject keys are canonical (used for filtering/colors); each has a label per language.
+const SUBJECTS = {
+  math:     { color:"#2C5F6D", label:{ en:"Math",     ar:"رياضيات" } },
+  science:  { color:"#3E6B4B", label:{ en:"Science",  ar:"علوم" } },
+  arabic:   { color:"#B44B43", label:{ en:"Arabic",   ar:"لغة عربية" } },
+  english:  { color:"#8A6A2E", label:{ en:"English",  ar:"لغة إنجليزية" } },
+  history:  { color:"#5B4B8A", label:{ en:"History",  ar:"تاريخ" } },
+};
+
+const assignments = [
+  {
+    id: 1,
+    subject: "math",
+    title: { en:"Solve Unit 3 exercises", ar:"حل تمارين الوحدة الثالثة" },
+    description: { en:"Solve the exercises on pages 42–45 in the workbook, showing all steps.",
+                    ar:"حل التمارين من صفحة 42 إلى 45 في كراسة الأنشطة، مع توضيح خطوات الحل." },
+    dueDate: "2026-09-24",
+    status: "upcoming", // upcoming | submitted | late
+    attachments: 1
+  },
+  {
+    id: 2,
+    subject: "science",
+    title: { en:"Report on the water cycle", ar:"تقرير عن الدورة المائية" },
+    description: { en:"A two-page report explaining the stages of the water cycle, with a diagram.",
+                    ar:"تقرير من صفحتين يشرح مراحل الدورة المائية مع رسم توضيحي." },
+    dueDate: "2026-09-21",
+    status: "late",
+    attachments: 0
+  },
+  {
+    id: 3,
+    subject: "arabic",
+    title: { en:"Poem analysis", ar:"تحليل نص شعري" },
+    description: { en:"Analyze the attached poem's theme, imagery, and meter.",
+                    ar:"تحليل القصيدة المرفقة من حيث الفكرة والصور الشعرية والوزن." },
+    dueDate: "2026-09-28",
+    status: "submitted",
+    attachments: 2
+  },
+  {
+    id: 4,
+    subject: "english",
+    title: { en:"Essay: My Favorite Season", ar:"مقال: فصلي المفضل" },
+    description: { en:"Write a 150-word essay describing your favorite season and why.",
+                    ar:"اكتب مقالًا من 150 كلمة يصف فصلك المفضل وسبب ذلك." },
+    dueDate: "2026-09-26",
+    status: "upcoming",
+    attachments: 0
+  },
+];
+
+const documents = [
+  { id:1, subject:"math",    type:"PDF",  size:"1.2 MB", date:"2026-09-10", name:{ en:"Unit 1 Summary - Math.pdf", ar:"ملخص الوحدة الأولى - رياضيات.pdf" } },
+  { id:2, subject:"science", type:"PPTX", size:"3.4 MB", date:"2026-09-12", name:{ en:"Presentation - Water Cycle.pptx", ar:"عرض تقديمي - الدورة المائية.pptx" } },
+  { id:3, subject:"english", type:"XLSX", size:"84 KB",  date:"2026-09-08", name:{ en:"Vocabulary List - Unit 2.xlsx", ar:"جدول المفردات - الوحدة 2.xlsx" } },
+  { id:4, subject:"arabic",  type:"DOCX", size:"210 KB", date:"2026-09-15", name:{ en:"Assigned Poem Text.docx", ar:"نص القصيدة المقررة.docx" } },
+  { id:5, subject:"history", type:"PDF",  size:"2.8 MB", date:"2026-09-05", name:{ en:"Map of Historical Campaigns.pdf", ar:"خريطة الحملات التاريخية.pdf" } },
+  { id:6, subject:"science", type:"MP3",  size:"6.1 MB", date:"2026-09-14", name:{ en:"Audio Lecture Recording.mp3", ar:"تسجيل الشرح الصوتي.mp3" } },
+];
+
+const FILE_COLORS = {
+  PDF:"#B44B43", PPTX:"#D98E4A", XLSX:"#3E6B4B", DOCX:"#2C5F6D", MP3:"#5B4B8A"
+};
+
+/* ============ Language state ============ */
+let LANG = "en";
+let activeFilter = "all";
+
+function t(key, ...args){
+  const val = STRINGS[LANG][key];
+  return typeof val === "function" ? val(...args) : val;
+}
+
+function setLanguage(lang){
+  LANG = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+
+  document.getElementById("lang-en").classList.toggle("active", lang === "en");
+  document.getElementById("lang-ar").classList.toggle("active", lang === "ar");
+
+  document.getElementById("page-title").textContent = t("pageTitle");
+  document.getElementById("page-subtitle").textContent = t("pageSubtitle");
+  document.getElementById("assign-heading").textContent = t("assignHeading");
+  document.getElementById("library-heading").textContent = t("libraryHeading");
+  document.getElementById("doc-search").placeholder = t("searchPlaceholder");
+  document.getElementById("library-empty").textContent = t("emptyLibrary");
+
+  renderAssignments();
+  renderFilters();
+  renderLibrary();
+}
+
+/* ============ Assignment cards rendering ============ */
+function daysUntil(dateStr){
+  const today = new Date("2026-09-19"); // demo "today" — replace with `new Date()` in production
+  const due = new Date(dateStr);
+  return Math.round((due - today) / 86400000);
+}
+
+function dueLabel(a){
+  const d = daysUntil(a.dueDate);
+  if(a.status === "submitted") return t("statusSubmitted");
+  if(d < 0) return t("dueLateBy", Math.abs(d));
+  if(d === 0) return t("dueToday");
+  if(d === 1) return t("dueTomorrow");
+  return t("dueIn", d);
+}
+
+function renderAssignments(){
+  const statusLabels = { upcoming:t("statusUpcoming"), submitted:t("statusSubmitted"), late:t("statusLate") };
+  const grid = document.getElementById("assignments-grid");
+  grid.innerHTML = assignments.map(a => `
+    <article class="assignment-card" style="--subject-color:${SUBJECTS[a.subject].color}">
+      <span class="subject-tag">${SUBJECTS[a.subject].label[LANG]}</span>
+      <h3>${a.title[LANG]}</h3>
+      <p class="desc">${a.description[LANG]}</p>
+      <div class="assignment-meta">
+        <span class="due">📅 ${dueLabel(a)}</span>
+        <span class="status-pill ${a.status}">${statusLabels[a.status]}</span>
+      </div>
+      <div class="assignment-actions">
+        <button class="btn primary" onclick="openAssignment(${a.id})">${t("openAssignment")}</button>
+        ${a.attachments > 0 ? `<button class="btn ghost">${t("attachmentCount", a.attachments)}</button>` : ""}
+      </div>
+    </article>
+  `).join("");
+  document.getElementById("assign-count").textContent = `(${assignments.length})`;
+}
+
+function openAssignment(id){
+  const a = assignments.find(x => x.id === id);
+  alert(`${t("openAssignment")}: ${a.title[LANG]}`); // replace with navigation to the real assignment page
+}
+
+/* ============ Document library rendering ============ */
+function renderFilters(){
+  const subjectKeys = [...new Set(documents.map(d => d.subject))];
+  const wrap = document.getElementById("doc-filters");
+  const options = [{ key:"all", label:t("filterAll") }, ...subjectKeys.map(k => ({ key:k, label:SUBJECTS[k].label[LANG] }))];
+  wrap.innerHTML = options.map(o =>
+    `<button class="${o.key===activeFilter ? 'active':''}" data-subject="${o.key}">${o.label}</button>`
+  ).join("");
+  wrap.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      activeFilter = btn.dataset.subject;
+      renderFilters();
+      renderLibrary();
+    });
+  });
+}
+
+function renderLibrary(){
+  const query = document.getElementById("doc-search").value.trim().toLowerCase();
+  const filtered = documents.filter(d=>{
+    const matchSubject = activeFilter === "all" || d.subject === activeFilter;
+    const matchQuery = d.name[LANG].toLowerCase().includes(query);
+    return matchSubject && matchQuery;
+  });
+
+  const list = document.getElementById("library-list");
+  const empty = document.getElementById("library-empty");
+
+  if(filtered.length === 0){
+    list.style.display = "none";
+    empty.style.display = "block";
+  } else {
+    list.style.display = "block";
+    empty.style.display = "none";
+    list.innerHTML = filtered.map(d => `
+      <div class="doc-row">
+        <div class="doc-icon" style="background:${FILE_COLORS[d.type] || '#2C5F6D'}">${d.type}</div>
+        <div class="doc-info">
+          <p class="name">${d.name[LANG]}</p>
+          <div class="meta">
+            <span>${SUBJECTS[d.subject].label[LANG]}</span>
+            <span>${d.size}</span>
+            <span>${d.date}</span>
+          </div>
+        </div>
+        <button class="download" onclick="downloadDoc(${d.id})">${t("download")}</button>
+      </div>
+    `).join("");
+  }
+  document.getElementById("doc-count").textContent = `(${filtered.length})`;
+}
+
+function downloadDoc(id){
+  const d = documents.find(x => x.id === id);
+  alert(`${t("download")}: ${d.name[LANG]}`); // replace with a real download link, e.g. window.location = d.url
+}
+
+document.getElementById("doc-search").addEventListener("input", renderLibrary);
+document.getElementById("lang-en").addEventListener("click", () => setLanguage("en"));
+document.getElementById("lang-ar").addEventListener("click", () => setLanguage("ar"));
+
+/* ============ Init ============ */
+setLanguage("en");
+</script>
+</body>
+</html>
