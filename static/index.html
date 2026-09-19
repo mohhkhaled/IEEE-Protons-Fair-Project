@@ -1,1 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daresny - Student Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="/static/script.js"></script>
+    <style>
+      
+    </style>
+</head>
+<body>
 
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <h1>Daresny</h1>
+            <span class="badge-tag">LMS</span>
+        </a>
+
+        <ul class="nav-links" id="navLinks">
+            <li>
+                <a href="#assignments" class="nav-link">
+                    <i class="fa-solid fa-file-signature"></i> Assignments
+                    <span class="badge-count" id="badge-assignments">3</span>
+                </a>
+            </li>
+            <li>
+                <a href="#files" class="nav-link">
+                    <i class="fa-solid fa-folder-open"></i> Files
+                </a>
+            </li>
+            <li>
+                <a href="#messages" class="nav-link">
+                    <i class="fa-solid fa-comments"></i> Messages
+                    <span class="badge-count" id="badge-messages">5</span>
+                </a>
+            </li>
+            <li>
+                <a href="#todos" class="nav-link">
+                    <i class="fa-solid fa-list-check"></i> Todos
+                </a>
+            </li>
+            <li>
+                <a href="#notifications" class="nav-link">
+                    <i class="fa-solid fa-bell"></i> Notifications
+                    <span class="badge-count" id="badge-notifications">2</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-actions">
+            <button class="btn-create-post" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i> New Post
+            </button>
+            <div class="nav-profile">
+                <div class="avatar" id="userAvatar">AH</div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">Ahmed Hassan</span>
+                    <span class="user-role" id="userRole">Student</span>
+                </div>
+            </div>
+            <div class="mobile-toggle" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        
+        <!-- Left Sidebar / Supporting Widgets -->
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <span>Upcoming Deadlines</span>
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                
+                <div class="deadline-item">
+                    <div class="date-box">
+                        <div class="day">28</div>
+                        <div class="month">Oct</div>
+                    </div>
+                    <div class="deadline-info">
+                        <h4>Physics Project</h4>
+                        <p>School 1 &bull; 11:59 PM</p>
+                    </div>
+                </div>
+
+                <div class="deadline-item">
+                    <div class="date-box">
+                        <div class="day">02</div>
+                        <div class="month">Nov</div>
+                    </div>
+                    <div class="deadline-info">
+                        <h4>Math Midterm Quiz</h4>
+                        <p>School 1 &bull; Hall B</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <span>Quick Todos</span>
+                    <i class="fa-solid fa-square-check"></i>
+                </div>
+
+                <div class="todo-item">
+                    <input type="checkbox" id="todo1">
+                    <label for="todo1">Submit CS Lab Report</label>
+                </div>
+                <div class="todo-item">
+                    <input type="checkbox" id="todo2" checked>
+                    <label for="todo2">Read Chapter 4 Biology</label>
+                </div>
+                <div class="todo-item">
+                    <input type="checkbox" id="todo3">
+                    <label for="todo3">Pay Semester Installment</label>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-feed">
+            <div class="feed-header">
+                <div class="feed-header-top">
+                    <h2>
+                        <i class="fa-solid fa-bullhorn"></i>
+                        Latest Announcements
+                    </h2>
+                </div>
+
+                <div class="search-filter-box">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search announcements..." onkeyup="handleSearch()">
+                    </div>
+                    
+                    <div class="filter-tags">
+                        <button class="tag-btn active" onclick="filterCategory('all', this)">All</button>
+                        <button class="tag-btn" onclick="filterCategory('urgent', this)">Urgent</button>
+                        <button class="tag-btn" onclick="filterCategory('academic', this)">Academic</button>
+                        <button class="tag-btn" onclick="filterCategory('event', this)">Events</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Announcements Container -->
+            <div id="announcementsFeed">
+                <!-- Skeleton placeholders while loading API -->
+                <div class="skeleton skeleton-card"></div>
+                <div class="skeleton skeleton-card"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>New Announcement</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="createPostForm" onsubmit="handleCreatePost(event)">
+                <div class="form-group">
+                    <label for="postTitle">Title</label>
+                    <input type="text" id="postTitle" placeholder="Announcement title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="postCategory">Category</label>
+                    <select id="postCategory" required>
+                        <option value="academic">Academic</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="event">Event</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="postBody">Content</label>
+                    <textarea id="postBody" rows="4" placeholder="Write announcement details..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-create-post" style="width: 100%; justify-content: center; margin-top: 10px;">
+                    Publish Announcement
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // FastAPI Backend Endpoint Configuration
+        const API_BASE_URL = '/api/v1'; 
+
+        // State variables for filter and search
+        let currentCategory = 'all';
+        let searchQuery = '';
+
+        // Mobile Menu Toggle
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('show');
+        }
+
+        // Modal Handlers
+        function openModal() { document.getElementById('postModal').classList.add('active'); }
+        function closeModal() { document.getElementById('postModal').classList.remove('active'); }
+
+        // Fetch announcements from FastAPI REST endpoint
+        async function fetchAnnouncements() {
+            const feed = document.getElementById('announcementsFeed');
+
+            try {
+                // Construct URL with query parameters for FastAPI query filtering
+                const url = new URL(`${window.location.origin}${API_BASE_URL}/announcements`);
+                if (currentCategory !== 'all') url.searchParams.append('category', currentCategory);
+                if (searchQuery) url.searchParams.append('q', searchQuery);
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('API server unavailable');
+                const data = await response.json();
+                renderAnnouncements(data);
+            } catch (err) {
+                // Fallback Mock Data if FastAPI backend isn't running yet
+                console.log('Backend offline, using local mock state.');
+                const mockData = getMockData().filter(item => {
+                    const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                         item.body.toLowerCase().includes(searchQuery.toLowerCase());
+                    return matchesCategory && matchesSearch;
+                });
+                renderAnnouncements(mockData);
+            }
+        }
+
+        // Render Cards dynamically into HTML
+        function renderAnnouncements(items) {
+            const feed = document.getElementById('announcementsFeed');
+            
+            if (items.length === 0) {
+                feed.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: #fff; border-radius: 12px; color: #7f8c8d;">
+                        <i class="fa-solid fa-folder-open" style="font-size: 32px; margin-bottom: 10px;"></i>
+                        <p>No announcements found.</p>
+                    </div>`;
+                return;
+            }
+
+            feed.innerHTML = items.map(post => `
+                <article class="announcement-card category-${post.category}" data-announcement-id="${post.id}">
+                    <div class="card-top">
+                        <div class="author-meta">
+                            <div class="author-avatar">${post.author_initials || 'AD'}</div>
+                            <div class="author-details">
+                                <h3>${post.author_name}</h3>
+                                <p>${post.created_at} &bull; ${post.school || 'Daresny'}</p>
+                            </div>
+                        </div>
+                        <span class="category-chip">${post.category}</span>
+                    </div>
+                    <h3 class="announcement-title">${post.title}</h3>
+                    <p class="announcement-body">${post.body}</p>
+                    <div class="card-actions">
+                        <div class="action-group">
+                            <button class="action-btn" onclick="toggleLike(this, ${post.id})">
+                                <i class="fa-regular fa-heart"></i> <span>${post.likes || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // Post a new announcement to FastAPI (POST /api/v1/announcements)
+        async function handleCreatePost(event) {
+            event.preventDefault();
+
+            const newPost = {
+                title: document.getElementById('postTitle').value,
+                category: document.getElementById('postCategory').value,
+                body: document.getElementById('postBody').value,
+                author_name: "Ahmed Hassan",
+                author_initials: "AH",
+                school: "School 1",
+                created_at: "Just now"
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/announcements`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPost)
+                });
+
+                if (!response.ok) throw new Error('Failed to create post');
+            } catch (err) {
+                console.log('Local creation mode fallback.');
+            }
+
+            closeModal();
+            document.getElementById('createPostForm').reset();
+            fetchAnnouncements();
+        }
+
+        // Filter and Search Helpers
+        function filterCategory(category, btn) {
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = category;
+            fetchAnnouncements();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value;
+            fetchAnnouncements();
+        }
+
+        function toggleLike(btn, id) {
+            const countSpan = btn.querySelector('span');
+            let count = parseInt(countSpan.innerText);
+            btn.classList.toggle('liked');
+            if (btn.classList.contains('liked')) {
+                btn.querySelector('i').className = 'fa-solid fa-heart';
+                countSpan.innerText = count + 1;
+            } else {
+                btn.querySelector('i').className = 'fa-regular fa-heart';
+                countSpan.innerText = count - 1;
+            }
+        }
+
+        // Initial Mock Data
+        function getMockData() {
+            return [
+                {
+                    id: 1,
+                    title: "Mid-Semester Exam Schedule Revision & Room Allocations",
+                    body: "Please be advised that the Mid-Semester examination schedule for Class 12 Science and Arts streams has been updated. All students are requested to check their revised seating arrangements.",
+                    category: "urgent",
+                    author_name: "Administration Office",
+                    author_initials: "AD",
+                    school: "School 1",
+                    created_at: "2 hours ago",
+                    likes: 24
+                },
+                {
+                    id: 2,
+                    title: "Web Development Project Guidelines Released",
+                    body: "The prompt and starter code for Project 2 (Interactive Student Portal) have been published to the portal. Make sure your submissions follow the single-page application structure.",
+                    category: "academic",
+                    author_name: "Prof. Mohamed Kareem",
+                    author_initials: "MK",
+                    school: "Computer Science",
+                    created_at: "Yesterday at 3:45 PM",
+                    likes: 15
+                }
+            ];
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', fetchAnnouncements);
+    </script>
+</body>
+</html>

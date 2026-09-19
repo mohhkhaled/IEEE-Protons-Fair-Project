@@ -1,12 +1,28 @@
-from fastapi import FastAPI
+from fastapi import FastAPI 
+from fastapi.staticfiles import StaticFiles 
+from fastapi.responses import FileResponse
 from database import Base, Engine
 import models
-
+import crud
+from crud import *
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"),name="static")
 
 Base.metadata.create_all(bind=Engine)
 
-from crud import create_document, get_documents_by_school, get_document_by_id, delete_document
+
+@app.get("/")
+def read_root():
+    return FileResponse("static/login.html")
+
+@app.get("/register")
+def read_register():
+    return FileResponse("static/register.html")
+
+@app.get("/dashboard")
+def read_dashboard():
+    return FileResponse("static/index.html")
 
 @app.post("/documents/")
 def add_document(uploader_id: int, school_id: int, file_name: str, file_path: str):

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Daresny - Login</title>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Daresny</h1>
+            <p>Welcome back! Please login to your account.</p>
+        </div>
+
+        <form class="login-form">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+
+            <div class="input-group">
+                <label for="school">Select School</label>
+                <select id="school">
+                    <option value="" disabled selected>Choose your school...</option>
+                    <option value="school1">School 1</option>
+                    <option value="school2">School 2</option>
+                    <option value="school3">School 3</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span>Remember me</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit">Login</button>
+
+            <p class="register-link">
+                Don't have an account? <a href="/static/register.html">Register here</a>
+            </p>
+        </form>
+    </div>
+</body>
+</html>
