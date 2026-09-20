@@ -5,7 +5,8 @@ Routes in main.py will call these instead of writing
 database queries directly.
 """
 from database import SessionLocal
-from models import Documents, Notifications
+from models import Documents, Notifications, Announcements
+
 
 def create_document(uploader_id: int, school_id: int, file_name: str, file_path: str):
     session = SessionLocal()
@@ -57,7 +58,6 @@ def delete_document(document_id: int, uploader_id: int):
     return False
 
 
-
 def add_notification(user_id, message, notif_type):
     """Add a new notification"""
     session = SessionLocal()
@@ -71,12 +71,15 @@ def add_notification(user_id, message, notif_type):
     session.commit()
     session.close()
 
+
 def get_user_notifications(user_id):
     """Get all notifications for a specific user"""
     session = SessionLocal()
     results = session.query(Notifications).filter(Notifications.user_id == user_id).all()
     session.close()
     return results
+
+
 def get_unread_notifications(user_id):
     """Get only unread notifications for a specific user"""
     session = SessionLocal()
@@ -87,6 +90,7 @@ def get_unread_notifications(user_id):
     session.close()
     return results
 
+
 def mark_as_read(notification_id):
     """Mark a notification as read"""
     session = SessionLocal()
@@ -96,6 +100,7 @@ def mark_as_read(notification_id):
         session.commit()
     session.close()
 
+
 def delete_notification(notification_id):
     """Delete a specific notification"""
     session = SessionLocal()
@@ -104,3 +109,62 @@ def delete_notification(notification_id):
         session.delete(notification)
         session.commit()
     session.close()
+
+
+def create_announcement(school_id: int, title: str, content: str):
+    session = SessionLocal()
+    new_announcement = Announcements(
+        school_id=school_id,
+        title=title,
+        content=content
+    )
+    session.add(new_announcement)
+    session.commit()
+    session.refresh(new_announcement)
+    session.close()
+    return new_announcement
+
+
+def get_announcements_by_school(school_id: int):
+    session = SessionLocal()
+    results = (
+        session.query(Announcements)
+        .filter(Announcements.school_id == school_id)
+        .order_by(Announcements.created_at.desc())
+        .all()
+    )
+    session.close()
+    return results
+
+
+def get_announcement_by_id(announcement_id: int):
+    session = SessionLocal()
+    result = session.query(Announcements).filter(Announcements.id == announcement_id).first()
+    session.close()
+    return result
+
+
+def update_announcement(announcement_id: int, title: str = None, content: str = None):
+    session = SessionLocal()
+    announcement = session.query(Announcements).filter(Announcements.id == announcement_id).first()
+    if announcement:
+        if title is not None:
+            announcement.title = title
+        if content is not None:
+            announcement.content = content
+        session.commit()
+        session.refresh(announcement)
+    session.close()
+    return announcement
+
+
+def delete_announcement(announcement_id: int):
+    session = SessionLocal()
+    announcement = session.query(Announcements).filter(Announcements.id == announcement_id).first()
+    if announcement:
+        session.delete(announcement)
+        session.commit()
+        session.close()
+        return True
+    session.close()
+    return False
