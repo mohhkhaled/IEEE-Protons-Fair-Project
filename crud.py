@@ -6,7 +6,7 @@ database queries directly.
 """
 from database import SessionLocal
 from models import *
-
+#Document CRUD operations
 def create_document(uploader_id: int, school_id: int, file_name: str, file_path: str):
     session = SessionLocal()
     new_doc = Documents(
@@ -104,23 +104,33 @@ def delete_notification(notification_id):
         session.delete(notification)
         session.commit()
     session.close()
-
-def create_announcement(school_id: int, title: str, content: str):
+#Announcements CRUD operations
+def create_announcement(
+    school_id: int,
+    title: str,
+    content: str,
+    category: str
+):
     session = SessionLocal()
+
     new_announcement = Announcements(
         school_id=school_id,
         title=title,
-        content=content
+        content=content,
+        category=category
     )
+
     session.add(new_announcement)
     session.commit()
     session.refresh(new_announcement)
-    session.close()
-    return new_announcement
 
+    session.close()
+
+    return new_announcement
 
 def get_announcements_by_school(school_id: int, limit: int = 20):
     session = SessionLocal()
+
     results = (
         session.query(Announcements)
         .filter(Announcements.school_id == school_id)
@@ -128,24 +138,38 @@ def get_announcements_by_school(school_id: int, limit: int = 20):
         .limit(limit)
         .all()
     )
+
     session.close()
     return results
 
 
 def get_announcement_by_id(announcement_id: int):
     session = SessionLocal()
-    result = session.query(Announcements).filter(Announcements.id == announcement_id).first()
+
+    result = (
+        session.query(Announcements)
+        .filter(Announcements.id == announcement_id)
+        .first()
+    )
+
     session.close()
     return result
 
 
 def delete_announcement(announcement_id: int):
     session = SessionLocal()
-    announcement = session.query(Announcements).filter(Announcements.id == announcement_id).first()
+
+    announcement = (
+        session.query(Announcements)
+        .filter(Announcements.id == announcement_id)
+        .first()
+    )
+
     if announcement:
         session.delete(announcement)
         session.commit()
         session.close()
         return True
+
     session.close()
     return False

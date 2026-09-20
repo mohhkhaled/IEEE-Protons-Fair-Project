@@ -7,7 +7,6 @@ from database import Base, Engine
 import models
 import crud
 import schemas
-from crud import *
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"),name="static")
@@ -27,12 +26,18 @@ def read_register():
 def read_dashboard():
     return FileResponse("static/index.html")
 #Announcements Endpoints
-@app.post("/announcements/", response_model=schemas.AnnouncementResponse, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/announcements/",
+    response_model=schemas.AnnouncementResponse,
+    status_code=status.HTTP_201_CREATED
+)
 def add_announcement(data: schemas.AnnouncementCreate):
+
     return crud.create_announcement(
         school_id=data.school_id,
         title=data.title,
-        content=data.content
+        content=data.content,
+        category=data.category
     )
 
 @app.get("/announcements/school/{school_id}", response_model=List[schemas.AnnouncementResponse])
@@ -54,19 +59,35 @@ def remove_announcement(announcement_id: int):
     return {"message": "Announcement deleted successfully"}
 
 #Documents Endpoints
-@app.post("/documents/")
-def add_document(uploader_id: int, school_id: int, file_name: str, file_path: str):
-    return create_document(uploader_id, school_id, file_name, file_path)
+@app.post("/documents/", response_model=schemas.DocumentResponse)
+def add_document(data: schemas.DocumentCreate):
+    return crud.create_document(
+        uploader_id=data.uploader_id,
+        school_id=data.school_id,
+        file_name=data.file_name,
+        file_path=data.file_path
+    )
 
-@app.get("/documents/school/{school_id}")
+@app.get(
+    "/documents/school/{school_id}",
+    response_model=List[schemas.DocumentResponse]
+)
 def list_documents(school_id: int):
-    return get_documents_by_school(school_id)
+    return crud.get_documents_by_school(school_id)
 
-@app.get("/documents/{document_id}")
+@app.get(
+    "/documents/{document_id}",
+    response_model=schemas.DocumentResponse
+)
 def get_document(document_id: int):
-    doc = get_document_by_id(document_id)
+    doc = crud.get_document_by_id(document_id)
+
     if not doc:
-        return {"error": "Document not found"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found"
+        )
+
     return doc
 
 @app.delete("/documents/{document_id}")

@@ -1,17 +1,24 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Boolean,Text
 from datetime import datetime
 from database import Base, SessionLocal, Engine
+#Schools table
+class Schools(Base):
+    __tablename__ = "schools"
+
+    id = Column(Integer,primary_key=True, index=True)
+    logo_url = Column(String(255))
+    name = Column(String(220))
 #Main table
 class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    national_id = Column(String(14), unique=True,index=True )
-    name = Column(String(255))
-    email = Column(String(255), unique=True, index=True)
-    password_hash = Column(String(255))
-    role = Column(String(10))
-    school_id = Column(Integer, ForeignKey("schools.id"))
+    national_id = Column(String(14), unique=True,index=True ,nullable=False)
+    name = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    password_hash = Column(String(255),nullable=False)
+    role = Column(String(20),nullable=False)
+    school_id = Column(Integer, ForeignKey("schools.id"),nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 #Messages table
 class Messages(Base):
@@ -28,9 +35,10 @@ class Announcements(Base):
     __tablename__ = "announcements"
 
     id = Column(Integer, primary_key=True, index=True)
-    school_id = Column(Integer, ForeignKey("schools.id"))
-    title = Column(String(220))
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
+    title = Column(String(220), nullable=False)
     content = Column(Text, nullable=False)
+    category = Column(String(20), nullable=False, default="academic")
     created_at = Column(DateTime, default=datetime.utcnow)
 #Documents table
 class Documents(Base):
@@ -52,13 +60,7 @@ class Todos(Base):
     description = Column(Text, nullable=False)
     status = Column(String(20), default="pending")
     due_date = Column(Date, nullable=False)
-#Schools table
-class Schools(Base):
-    __tablename__ = "schools"
 
-    id = Column(Integer,primary_key=True, index=True)
-    logo_url = Column(String(255))
-    name = Column(String(220))
 #Notifications table
 class Notifications(Base):
     __tablename__ = "notifications"
