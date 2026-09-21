@@ -1,175 +1,144 @@
 """
 crud.py
 Functions that actually talk to the database.
-Routes in main.py will call these instead of writing
-database queries directly.
+Routes in main.py call these using the injected db session.
 """
-from database import SessionLocal
-from models import *
-#Document CRUD operations
-def create_document(uploader_id: int, school_id: int, file_name: str, file_path: str):
-    session = SessionLocal()
-    new_doc = Documents(
-        uploader_id=uploader_id,
-        school_id=school_id,
-        file_name=file_name,
-        file_path=file_path
+from sqlalchemy.orm import Session
+import models
+import schemas
+
+
+# --- Document CRUD Operations ---
+
+def create_document(db: Session, data: schemas.DocumentCreate):
+    new_doc = models.Documents(
+        uploader_id=data.uploader_id,
+        school_id=data.school_id,
+        file_name=data.file_name,
+        file_path=data.file_path
     )
-    session.add(new_doc)
-    session.commit()
-    session.refresh(new_doc)
-    session.close()
+    db.add(new_doc)
+    db.commit()
+    db.refresh(new_doc)
     return new_doc
 
 
-def get_documents_by_school(school_id: int):
-    session = SessionLocal()
-    results = (
-        session.query(Documents)
-        .filter(Documents.school_id == school_id)
-        .order_by(Documents.uploaded_at.desc())
+def get_documents_by_school(db: Session, school_id: int):
+    return (
+        db.query(models.Documents)
+        .filter(models.Documents.school_id == school_id)
+        .order_by(models.Documents.uploaded_at.desc())
         .all()
     )
-    session.close()
-    return results
 
 
-def get_document_by_id(document_id: int):
-    session = SessionLocal()
-    result = session.query(Documents).filter(Documents.id == document_id).first()
-    session.close()
-    return result
+def get_document_by_id(db: Session, document_id: int):
+    return db.query(models.Documents).filter(models.Documents.id == document_id).first()
 
 
-def delete_document(document_id: int, uploader_id: int):
-    session = SessionLocal()
+def delete_document(db: Session, document_id: int, uploader_id: int):
     doc = (
-        session.query(Documents)
-        .filter(Documents.id == document_id, Documents.uploader_id == uploader_id)
+        db.query(models.Documents)
+        .filter(models.Documents.id == document_id, models.Documents.uploader_id == uploader_id)
         .first()
     )
     if doc:
-        session.delete(doc)
-        session.commit()
-        session.close()
+        db.delete(doc)
+        db.commit()
         return True
-    session.close()
     return False
 
 
+# --- Notification CRUD Operations ---
 
-def add_notification(user_id, message, notif_type):
+def add_notification(db: Session, user_id: int, message: str, notif_type: str):
     """Add a new notification"""
-    session = SessionLocal()
-    new_notification = Notifications(
+    new_notification = models.Notifications(
         user_id=user_id,
         message=message,
         type=notif_type,
         is_read=False
     )
-    session.add(new_notification)
-    session.commit()
-    session.close()
+    db.add(new_notification)
+    db.commit()
+    db.refresh(new_notification)
+    return new_notification
 
-def get_user_notifications(user_id):
+
+def get_user_notifications(db: Session, user_id: int):
     """Get all notifications for a specific user"""
-    session = SessionLocal()
-    results = session.query(Notifications).filter(Notifications.user_id == user_id).all()
-    session.close()
-    return results
-def get_unread_notifications(user_id):
-    """Get only unread notifications for a specific user"""
-    session = SessionLocal()
-    results = session.query(Notifications).filter(
-        Notifications.user_id == user_id,
-        Notifications.is_read.is_(False)
-    ).all()
-    session.close()
-    return results
+    return db.query(models.Notifications).filter(models.Notifications.user_id == user_id).all()
 
-def mark_as_read(notification_id):
+
+def get_unread_notifications(db: Session, user_id: int):
+    """Get only unread notifications for a specific user"""
+    return db.query(models.Notifications).filter(
+        models.Notifications.user_id == user_id,
+        models.Notifications.is_read.is_(False)
+    ).all()
+
+
+def mark_as_read(db: Session, notification_id: int):
     """Mark a notification as read"""
-    session = SessionLocal()
-    notification = session.query(Notifications).filter(Notifications.id == notification_id).first()
+    notification = db.query(models.Notifications).filter(models.Notifications.id == notification_id).first()
     if notification:
         notification.is_read = True
-        session.commit()
-    session.close()
+        db.commit()
+        return True
+    return False
 
-def delete_notification(notification_id):
+
+def delete_notification(db: Session, notification_id: int):
     """Delete a specific notification"""
-    session = SessionLocal()
-    notification = session.query(Notifications).filter(Notifications.id == notification_id).first()
+    notification = db.query(models.Notifications).filter(models.Notifications.id == notification_id).first()
     if notification:
-        session.delete(notification)
-        session.commit()
-    session.close()
-#Announcements CRUD operations
-def create_announcement(
-    school_id: int,
-    title: str,
-    content: str,
-    category: str
-):
-    session = SessionLocal()
+        db.delete(notification)
+        db.commit()
+        return True
+    return False
 
-    new_announcement = Announcements(
-        school_id=school_id,
-        title=title,
-        content=content,
-        category=category
+
+# --- Announcements CRUD Operations ---
+
+def create_announcement(db: Session, data: schemas.AnnouncementCreate):
+    new_announcement = models.Announcements(
+        school_id=data.school_id,
+        title=data.title,
+        content=data.content,
+        category=data.category
     )
-
-    session.add(new_announcement)
-    session.commit()
-    session.refresh(new_announcement)
-
-    session.close()
-
+    db.add(new_announcement)
+    db.commit()
+    db.refresh(new_announcement)
     return new_announcement
 
-def get_announcements_by_school(school_id: int, limit: int = 20):
-    session = SessionLocal()
 
-    results = (
-        session.query(Announcements)
-        .filter(Announcements.school_id == school_id)
-        .order_by(Announcements.created_at.desc())
+def get_announcements_by_school(db: Session, school_id: int, limit: int = 20):
+    return (
+        db.query(models.Announcements)
+        .filter(models.Announcements.school_id == school_id)
+        .order_by(models.Announcements.created_at.desc())
         .limit(limit)
         .all()
     )
 
-    session.close()
-    return results
 
-
-def get_announcement_by_id(announcement_id: int):
-    session = SessionLocal()
-
-    result = (
-        session.query(Announcements)
-        .filter(Announcements.id == announcement_id)
+def get_announcement_by_id(db: Session, announcement_id: int):
+    return (
+        db.query(models.Announcements)
+        .filter(models.Announcements.id == announcement_id)
         .first()
     )
 
-    session.close()
-    return result
 
-
-def delete_announcement(announcement_id: int):
-    session = SessionLocal()
-
+def delete_announcement(db: Session, announcement_id: int):
     announcement = (
-        session.query(Announcements)
-        .filter(Announcements.id == announcement_id)
+        db.query(models.Announcements)
+        .filter(models.Announcements.id == announcement_id)
         .first()
     )
-
     if announcement:
-        session.delete(announcement)
-        session.commit()
-        session.close()
+        db.delete(announcement)
+        db.commit()
         return True
-
-    session.close()
     return False

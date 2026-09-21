@@ -1,26 +1,31 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Boolean,Text
-from datetime import datetime
-from database import Base, SessionLocal, Engine
-#Schools table
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Date, Boolean, Text
+from sqlalchemy.sql import func
+from database import Base
+
+# Schools table
 class Schools(Base):
     __tablename__ = "schools"
 
-    id = Column(Integer,primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     logo_url = Column(String(255))
     name = Column(String(220))
-#Main table
+
+
+# Users table
 class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    national_id = Column(String(14), unique=True,index=True ,nullable=False)
+    national_id = Column(String(14), unique=True, index=True, nullable=False)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    password_hash = Column(String(255),nullable=False)
-    role = Column(String(20),nullable=False)
-    school_id = Column(Integer, ForeignKey("schools.id"),nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-#Messages table
+    password_hash = Column(String(255), nullable=False)
+    role = Column(String(20), nullable=False)
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# Messages table
 class Messages(Base):
     __tablename__ = "messages"
 
@@ -28,9 +33,11 @@ class Messages(Base):
     sender_id = Column(Integer, ForeignKey("users.id"))
     receiver_id = Column(Integer, ForeignKey("users.id"))
     content = Column(Text, nullable=False)
-    sent_at = Column(DateTime, default=datetime.utcnow)
-    is_read = Column(Boolean, default=False)  
-#Announcements table
+    sent_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_read = Column(Boolean, default=False)
+
+
+# Announcements table
 class Announcements(Base):
     __tablename__ = "announcements"
 
@@ -39,8 +46,10 @@ class Announcements(Base):
     title = Column(String(220), nullable=False)
     content = Column(Text, nullable=False)
     category = Column(String(20), nullable=False, default="academic")
-    created_at = Column(DateTime, default=datetime.utcnow)
-#Documents table
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# Documents table
 class Documents(Base):
     __tablename__ = "documents"
 
@@ -49,8 +58,10 @@ class Documents(Base):
     school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
-#Todos table
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# Todos table
 class Todos(Base):
     __tablename__ = "todos"
 
@@ -61,7 +72,8 @@ class Todos(Base):
     status = Column(String(20), default="pending")
     due_date = Column(Date, nullable=False)
 
-#Notifications table
+
+# Notifications table
 class Notifications(Base):
     __tablename__ = "notifications"
 
@@ -69,6 +81,5 @@ class Notifications(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     message = Column(String(255))
     type = Column(String(50))
-    is_read = Column(Boolean, default=False) 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

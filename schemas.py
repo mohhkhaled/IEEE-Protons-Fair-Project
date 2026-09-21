@@ -1,5 +1,24 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, date
+from typing import Optional
+
+
+# =========================
+# Schools
+# =========================
+
+class SchoolCreate(BaseModel):
+    name: str
+    logo_url: Optional[str] = None
+
+
+class SchoolResponse(BaseModel):
+    id: int
+    name: str
+    logo_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 # =========================
@@ -52,11 +71,13 @@ class MessageResponse(BaseModel):
 # =========================
 # Announcements
 # =========================
+
 class AnnouncementCreate(BaseModel):
     school_id: int
     title: str
     content: str
-    category: str
+    category: str = "academic"
+
 
 class AnnouncementResponse(BaseModel):
     id: int
@@ -69,15 +90,18 @@ class AnnouncementResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 # =========================
 # Documents
 # =========================
+
 class DocumentCreate(BaseModel):
     uploader_id: int
     school_id: int
     file_name: str
     file_path: str
-    
+
+
 class DocumentResponse(BaseModel):
     id: int
     uploader_id: int
@@ -89,3 +113,48 @@ class DocumentResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+# =========================
+# Todos
+# =========================
+
+class TodoCreate(BaseModel):
+    user_id: int
+    title: str
+    description: str
+    due_date: date
+    status: str = "pending"
+
+
+class TodoResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    description: str
+    status: str
+    due_date: date
+
+    class Config:
+        from_attributes = True
+
+
+# =========================
+# Notifications
+# =========================
+
+class NotificationCreate(BaseModel):
+    user_id: int
+    message: str
+    type: str
+
+
+class NotificationResponse(BaseModel):
+    id: int
+    user_id: int
+    message: str
+    type: str
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
