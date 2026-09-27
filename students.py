@@ -1,109 +1,89 @@
-from flask import Blueprint, request, jsonify
-from db import get_connection
-from mysql.connector import Error
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from database import get_db
+from models import Student
+from pydantic import BaseModel
+from typing import Optional
 
-students_bp = Blueprint("students", __name__, url_prefix="/students")
+router = APIRouter(prefix="/students", tags=["Students"])
+
+# Pydantic schemas for request validation
+class StudentCreate(BaseModel):
+    full_name: str
+    email: str
+    grade: str
+    phone: Optional[str] = None
+
+class StudentUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    grade: Optional[str] = None
+    phone: Optional[str] = None
 
 
-# ---------- إضافة طالب جديد ----------
-@students_bp.route("/", methods=["POST"])
-def create_student():
-    data = request.get_json()
-
-    required_fields = ["full_name", "email", "grade"]
-    missing = [f for f in required_fields if f not in data]
-    if missing:
-        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+# ---------- Create a New Student ----------
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_student(student_data: StudentCreate, db: Session = Depends(get_db)):
+    db_student = Student(
+        full_name=student_data.full_name,
+        email=student_data.email,
+        grade=student_data.grade,
+        phone=student_data.phone
+    )
+    db.add(db_student)
     try:
-        cursor.execute(
-            "INSERT INTO students (full_name, email, grade, phone) VALUES (%s, %s, %s, %s)",
-            (data["full_name"], data["email"], data["grade"], data.get("phone")),
-        )
-        conn.commit()
-        new_id = cursor.lastrowid
-        return jsonify({"id": new_id, "message": "Student created successfully"}), 201
-    except Error as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 400
-    finally:
-        cursor.close()
-        conn.close()
+        db.commit()
+        db.refresh(db_student)
+        return {"id": db_student.id, "message": "Student created successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-# ---------- عرض كل الطلاب ----------
-@students_bp.route("/", methods=["GET"])
-def get_students():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+# ---------- Get All Students ----------
+@router.get("/")
+def get_students(db: Session = Depends(get_db)):
+    students = db.query(Student).all()
+    return students
+
+
+# ---------- Get a Single Student ----------
+@router.get("/{student_id}")
+def get_student(student_id: int, db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return student
+
+
+# ---------- Update a Student ----------
+@router.put("/{student_id}")
+def update_student(student_id: int, student_data: StudentUpdate, db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    # Update only fields that were sent in the request
+    update_data = student_data.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(student, key, value)
+    
     try:
-        cursor.execute("SELECT * FROM students")
-        students = cursor.fetchall()
-        return jsonify(students), 200
-    finally:
-        cursor.close()
-        conn.close()
+        db.commit()
+        db.refresh(student)
+        return {"message": "Student updated successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-# ---------- عرض طالب واحد ----------
-@students_bp.route("/<int:student_id>", methods=["GET"])
-def get_student(student_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
-        student = cursor.fetchone()
-        if not student:
-            return jsonify({"error": "Student not found"}), 404
-        return jsonify(student), 200
-    finally:
-        cursor.close()
-        conn.close()
-
-
-# ---------- تعديل بيانات طالب ----------
-@students_bp.route("/<int:student_id>", methods=["PUT"])
-def update_student(student_id):
-    data = request.get_json()
-
-    allowed_fields = ["full_name", "email", "grade", "phone"]
-    updates = {k: v for k, v in data.items() if k in allowed_fields}
-
-    if not updates:
-        return jsonify({"error": "No valid fields to update"}), 400
-
-    set_clause = ", ".join(f"{field} = %s" for field in updates)
-    values = list(updates.values()) + [student_id]
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute(f"UPDATE students SET {set_clause} WHERE id = %s", values)
-        conn.commit()
-        if cursor.rowcount == 0:
-            return jsonify({"error": "Student not found"}), 404
-        return jsonify({"message": "Student updated successfully"}), 200
-    except Error as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 400
-    finally:
-        cursor.close()
-        conn.close()
-
-
-# ---------- حذف طالب ----------
-@students_bp.route("/<int:student_id>", methods=["DELETE"])
-def delete_student(student_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("DELETE FROM students WHERE id = %s", (student_id,))
-        conn.commit()
-        if cursor.rowcount == 0:
-            return jsonify({"error": "Student not found"}), 404
-        return jsonify({"message": "Student deleted successfully"}), 200
-    finally:
-        cursor.close()
-        conn.close()
+# ---------- Delete a Student ----------
+@router.delete("/{student_id}")
+def delete_student(student_id: int, db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    db.delete(student)
+    db.commit()
+    return {"message": "Student deleted successfully"}

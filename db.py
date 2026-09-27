@@ -1,25 +1,22 @@
-import mysql.connector
-from mysql.connector import Error
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
+# Replace with your actual MySQL username, password, and database name
+DATABASE_URL = "mysql+mysqlconnector://root:YOUR_PASSWORD@localhost/your_database_name"
 
-# غيّر البيانات دي على حسب إعدادات MySQL عندك
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "your_password",
-    "database": "school_db",
-}
+# Create the SQLAlchemy engine
+engine = create_engine(DATABASE_URL)
 
+# Create a configured "SessionLocal" class
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def get_connection():
-    """
-    بتفتح اتصال جديد بالداتابيز.
-    بنستخدم dictionary=True عشان النتائج ترجع كـ dict مباشرة (اسم العمود: القيمة)
-    بدل ما ترجع tuples.
-    """
+# Base class for your ORM models to inherit from
+Base = declarative_base()
+
+# Dependency injection for FastAPI routes
+def get_db():
+    db = SessionLocal()
     try:
-        conn = mysql.connector.connect(**DB_CONFIG)
-        return conn
-    except Error as e:
-        print(f"Database connection error: {e}")
-        raise
+        yield db
+    finally:
+        db.close()

@@ -1,109 +1,88 @@
-from flask import Blueprint, request, jsonify
-from db import get_connection
-from mysql.connector import Error
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from database import get_db
+from models import Teacher
+from pydantic import BaseModel
+from typing import Optional
 
-teachers_bp = Blueprint("teachers", __name__, url_prefix="/teachers")
+router = APIRouter(prefix="/teachers", tags=["Teachers"])
+
+# Pydantic schemas for request validation
+class TeacherCreate(BaseModel):
+    full_name: str
+    email: str
+    phone: Optional[str] = None
+    department: Optional[str] = None
+
+class TeacherUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    department: Optional[str] = None
 
 
-# ---------- إضافة مدرس جديد ----------
-@teachers_bp.route("/", methods=["POST"])
-def create_teacher():
-    data = request.get_json()
-
-    required_fields = ["full_name", "email"]
-    missing = [f for f in required_fields if f not in data]
-    if missing:
-        return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+# ---------- Create a New Teacher ----------
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_teacher(teacher_data: TeacherCreate, db: Session = Depends(get_db)):
+    db_teacher = Teacher(
+        full_name=teacher_data.full_name,
+        email=teacher_data.email,
+        phone=teacher_data.phone,
+        department=teacher_data.department
+    )
+    db.add(db_teacher)
     try:
-        cursor.execute(
-            "INSERT INTO teachers (full_name, email, phone, department) VALUES (%s, %s, %s, %s)",
-            (data["full_name"], data["email"], data.get("phone"), data.get("department")),
-        )
-        conn.commit()
-        new_id = cursor.lastrowid
-        return jsonify({"id": new_id, "message": "Teacher created successfully"}), 201
-    except Error as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 400
-    finally:
-        cursor.close()
-        conn.close()
+        db.commit()
+        db.refresh(db_teacher)
+        return {"id": db_teacher.id, "message": "Teacher created successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-# ---------- عرض كل المدرسين ----------
-@teachers_bp.route("/", methods=["GET"])
-def get_teachers():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+# ---------- Get All Teachers ----------
+@router.get("/")
+def get_teachers(db: Session = Depends(get_db)):
+    teachers = db.query(Teacher).all()
+    return teachers
+
+
+# ---------- Get a Single Teacher ----------
+@router.get("/{teacher_id}")
+def get_teacher(teacher_id: int, db: Session = Depends(get_db)):
+    teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    return teacher
+
+
+# ---------- Update a Teacher ----------
+@router.put("/{teacher_id}")
+def update_teacher(teacher_id: int, teacher_data: TeacherUpdate, db: Session = Depends(get_db)):
+    teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    
+    update_data = teacher_data.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(teacher, key, value)
+    
     try:
-        cursor.execute("SELECT * FROM teachers")
-        teachers = cursor.fetchall()
-        return jsonify(teachers), 200
-    finally:
-        cursor.close()
-        conn.close()
+        db.commit()
+        db.refresh(teacher)
+        return {"message": "Teacher updated successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-# ---------- عرض مدرس واحد ----------
-@teachers_bp.route("/<int:teacher_id>", methods=["GET"])
-def get_teacher(teacher_id):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM teachers WHERE id = %s", (teacher_id,))
-        teacher = cursor.fetchone()
-        if not teacher:
-            return jsonify({"error": "Teacher not found"}), 404
-        return jsonify(teacher), 200
-    finally:
-        cursor.close()
-        conn.close()
-
-
-# ---------- تعديل بيانات مدرس ----------
-@teachers_bp.route("/<int:teacher_id>", methods=["PUT"])
-def update_teacher(teacher_id):
-    data = request.get_json()
-
-    allowed_fields = ["full_name", "email", "phone", "department"]
-    updates = {k: v for k, v in data.items() if k in allowed_fields}
-
-    if not updates:
-        return jsonify({"error": "No valid fields to update"}), 400
-
-    set_clause = ", ".join(f"{field} = %s" for field in updates)
-    values = list(updates.values()) + [teacher_id]
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute(f"UPDATE teachers SET {set_clause} WHERE id = %s", values)
-        conn.commit()
-        if cursor.rowcount == 0:
-            return jsonify({"error": "Teacher not found"}), 404
-        return jsonify({"message": "Teacher updated successfully"}), 200
-    except Error as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 400
-    finally:
-        cursor.close()
-        conn.close()
-
-
-# ---------- حذف مدرس ----------
-@teachers_bp.route("/<int:teacher_id>", methods=["DELETE"])
-def delete_teacher(teacher_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("DELETE FROM teachers WHERE id = %s", (teacher_id,))
-        conn.commit()
-        if cursor.rowcount == 0:
-            return jsonify({"error": "Teacher not found"}), 404
-        return jsonify({"message": "Teacher deleted successfully"}), 200
-    finally:
-        cursor.close()
-        conn.close()
+# ---------- Delete a Teacher ----------
+@router.delete("/{teacher_id}")
+def delete_teacher(teacher_id: int, db: Session = Depends(get_db)):
+    teacher = db.query(Teacher).filter(Teacher.id == teacher_id).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    
+    db.delete(teacher)
+    db.commit()
+    return {"message": "Teacher deleted successfully"}
