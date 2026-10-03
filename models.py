@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+﻿from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from database import Base
 
 class User(Base):
@@ -29,3 +29,14 @@ class Teacher(Base):
     email = Column(String(100), unique=True, nullable=False)
     phone = Column(String(20))
     department = Column(String(50))
+
+
+class Notifications(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    message = Column(String(255), nullable=False)
+    type = Column(String(50))
+    is_read = Column(Boolean, default=False)
+    created_at = Column(String(255))
