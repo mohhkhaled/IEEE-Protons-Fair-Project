@@ -29,3 +29,11 @@ class Teacher(Base):
     email = Column(String(100), unique=True, nullable=False)
     phone = Column(String(20))
     department = Column(String(50))
+
+
+class Schools(Base):
+    __tablename__ = "schools"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    logo_url = Column(String(255))

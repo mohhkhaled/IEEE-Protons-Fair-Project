@@ -1,11 +1,11 @@
-"""
+﻿"""
 crud.py
 Functions that actually talk to the database.
 Routes in main.py will call these instead of writing
 database queries directly.
 """
 from database import SessionLocal
-from models import Documents, Notifications
+from models import Documents, Notifications, Schools
 
 def create_document(uploader_id: int, school_id: int, file_name: str, file_path: str):
     session = SessionLocal()
@@ -102,5 +102,55 @@ def delete_notification(notification_id):
     notification = session.query(Notifications).filter(Notifications.id == notification_id).first()
     if notification:
         session.delete(notification)
+        session.commit()
+    session.close()
+
+def add_school(name, logo_url=None):
+    """Add a new school"""
+    session = SessionLocal()
+    new_school = Schools(
+        name=name,
+        logo_url=logo_url
+    )
+    session.add(new_school)
+    session.commit()
+    session.close()
+
+
+def get_all_schools():
+    """Get all schools"""
+    session = SessionLocal()
+    results = session.query(Schools).all()
+    session.close()
+    return results
+
+
+def get_school_by_id(school_id):
+    """Get a specific school by its id"""
+    session = SessionLocal()
+    result = session.query(Schools).filter(Schools.id == school_id).first()
+    session.close()
+    return result
+
+
+def update_school(school_id, name=None, logo_url=None):
+    """Update a school's name or logo"""
+    session = SessionLocal()
+    school = session.query(Schools).filter(Schools.id == school_id).first()
+    if school:
+        if name:
+            school.name = name
+        if logo_url:
+            school.logo_url = logo_url
+        session.commit()
+    session.close()
+
+
+def delete_school(school_id):
+    """Delete a school"""
+    session = SessionLocal()
+    school = session.query(Schools).filter(Schools.id == school_id).first()
+    if school:
+        session.delete(school)
         session.commit()
     session.close()
