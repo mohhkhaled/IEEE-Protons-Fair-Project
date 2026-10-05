@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, date
 
 
 # =========================
@@ -23,7 +22,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: str
     school_id: int
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -43,8 +42,8 @@ class MessageResponse(BaseModel):
     sender_id: int
     receiver_id: int
     content: str
-    sent_at: str
-    is_read: int
+    sent_at: datetime
+    is_read: bool
 
     class Config:
         from_attributes = True
@@ -65,7 +64,29 @@ class AnnouncementResponse(BaseModel):
     school_id: int
     title: str
     content: str
-    created_at: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# =========================
+# Assignments
+# =========================
+
+class AssignmentCreate(BaseModel):
+    title: str
+    description: str | None = None
+    due_date: str
+    school_id: int
+
+
+class AssignmentResponse(BaseModel):
+    id: int
+    title: str
+    description: str | None = None
+    due_date: str
+    school_id: int
 
     class Config:
         from_attributes = True
@@ -77,11 +98,11 @@ class AnnouncementResponse(BaseModel):
 
 class DocumentResponse(BaseModel):
     id: int
-    uploaderId: int
-    schoolId: int
-    fileName: str
-    filePath: str
-    uploadedAt: datetime
+    uploader_id: int
+    school_id: int
+    file_name: str
+    file_path: str
+    uploaded_at: datetime
 
     class Config:
         from_attributes = True
