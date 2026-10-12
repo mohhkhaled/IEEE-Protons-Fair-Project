@@ -4,12 +4,15 @@ from database import SessionLocal, Base, engine
 import models
 import students
 import teachers
+from fastapi.staticfiles import StaticFiles
 from models import Announcements, Assignments
 from crud import create_document, get_documents_by_school, get_document_by_id, delete_document
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(students.router)
 app.include_router(teachers.router)
