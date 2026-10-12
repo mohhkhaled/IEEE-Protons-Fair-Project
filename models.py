@@ -30,10 +30,44 @@ class Teacher(Base):
     phone = Column(String(20))
     department = Column(String(50))
 
-
 class Schools(Base):
     __tablename__ = "schools"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
     logo_url = Column(String(255))
+
+class Announcements(Base):
+    __tablename__ = "announcements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    content = Column(String(1000), nullable=False)
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
+    created_at = Column(String(255))
+
+class Assignments(Base):
+    __tablename__ = "assignments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(String(1000))
+    due_date = Column(String(255))
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
+
+class Documents(Base):
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    uploader_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=False)
+    file_name = Column(String(255), nullable=False)
+    file_path = Column(String(255), nullable=False)
+
+class Notifications(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    message = Column(String(500), nullable=False)
+    created_at = Column(String(255))
